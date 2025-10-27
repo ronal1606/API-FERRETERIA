@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Admin - Ferretería</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+    
+    // Iconos SVG simples
+    const Database = () => <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" /></svg>;
+    const Users = () => <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>;
+    const Package = () => <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>;
+    const ShoppingCart = () => <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>;
+    const Briefcase = () => <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>;
+    const Tag = () => <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>;
+    const FolderOpen = () => <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z" /></svg>;
+    const Plus = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>;
+    const Edit = () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>;
+    const Trash = () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>;
+    const Search = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>;
+    const X = () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>;
+    const Save = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>;
+    
+    const API_URL = 'http://localhost:3000';
+
+    const collections = [
+      { name: 'empleados', label: 'Empleados', icon: Users, color: 'blue' },
+      { name: 'clientes', label: 'Clientes', icon: Users, color: 'green' },
+      { name: 'productos', label: 'Productos', icon: Package, color: 'purple' },
+      { name: 'ventas', label: 'Ventas', icon: ShoppingCart, color: 'orange' },
+      { name: 'cargos', label: 'Cargos', icon: Briefcase, color: 'red' },
+      { name: 'marcas', label: 'Marcas', icon: Tag, color: 'pink' },
+      { name: 'categorias', label: 'Categorías', icon: FolderOpen, color: 'indigo' },
+    ];
+
+    const AdminPanel = () => {
+      const [selectedCollection, setSelectedCollection] = useState(null);
+      const [data, setData] = useState([]);
+      const [loading, setLoading] = useState(false);
+      const [showForm, setShowForm] = useState(false);
+      const [editingItem, setEditingItem] = useState(null);
+      const [formData, setFormData] = useState({});
+      const [searchTerm, setSearchTerm] = useState('');
+      const [relatedData, setRelatedData] = useState({});
+
+      const loadCollection = async (collectionName) => {
+        setLoading(true);
+        try {
+          const response = await fetch(`${API_URL}/${collectionName}`);
+          const json = await response.json();
+          setData(json);
+          setSelectedCollection(collectionName);
+          setShowForm(false);
+          setEditingItem(null);
+          setSearchTerm('');
+          
+          if (collectionName === 'empleados') {
+            const cargos = await fetch(`${API_URL}/cargos`).then(r => r.json());
+            setRelatedData({ cargos });
+          } else if (collectionName === 'productos') {
+            const [marcas, categorias] = await Promise.all([
+              fetch(`${API_URL}/marcas`).then(r => r.json()),
+              fetch(`${API_URL}/categorias`).then(r => r.json())
+            ]);
+            setRelatedData({ marcas, categorias });
+          }
+        } catch (error) {
+          alert('Error al cargar datos: ' + error.message);
+        }
+        setLoading(false);
+      };
+
+      const handleCreate = async () => {
+        try {
+          const response = await fetch(`${API_URL}/${selectedCollection}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+          });
+          if (response.ok) {
+            alert('✅ Creado exitosamente');
+            loadCollection(selectedCollection);
+          } else {
+            const error = await response.json();
+            alert('Error: ' + error.error);
+          }
+        } catch (error) {
+          alert('Error: ' + error.message);
+        }
+      };
+
+      const handleUpdate = async () => {
+        try {
+          const response = await fetch(`${API_URL}/${selectedCollection}/${editingItem._id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+          });
+          if (response.ok) {
+            alert('✅ Actualizado exitosamente');
+            loadCollection(selectedCollection);
+          } else {
+            const error = await response.json();
+            alert('Error: ' + error.error);
+          }
+        } catch (error) {
+          alert('Error: ' + error.message);
+        }
+      };
+
+      const handleDelete = async (id) => {
+        if (!confirm('¿Estás seguro de eliminar este registro?')) return;
+        
+        try {
+          const response = await fetch(`${API_URL}/${selectedCollection}/${id}`, {
+            method: 'DELETE'
+          });
+          if (response.ok) {
+            alert('🗑️ Eliminado exitosamente');
+            loadCollection(selectedCollection);
+          }
+        } catch (error) {
+          alert('Error: ' + error.message);
+        }
+      };
+
+      const openCreateForm = () => {
+        setFormData({});
+        setEditingItem(null);
+        setShowForm(true);
+      };
+
+      const openEditForm = (item) => {
+        setFormData({ ...item });
+        setEditingItem(item);
+        setShowForm(true);
+      };
+
+      const filteredData = data.filter(item => {
+        const searchLower = searchTerm.toLowerCase();
+        return Object.values(item).some(value => 
+          String(value).toLowerCase().includes(searchLower)
+        );
+      });
+
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+          <header className="bg-white shadow-md border-b-4 border-blue-500">
+            <div className="max-w-7xl mx-auto px-6 py-6">
+              <div className="flex items-center gap-3">
+                <Database />
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-800">Panel de Administración</h1>
+                  <p className="text-gray-600">API Ferretería - Sistema de Gestión</p>
+                </div>
+              </div>
+            </div>
+          </header>
+
+          <div className="max-w-7xl mx-auto px-6 py-8">
+            {!selectedCollection && (
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800 mb-6">Selecciona una colección</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {collections.map((collection) => {
+                    const Icon = collection.icon;
+                    const hexColor =
+                      collection.color === 'blue' ? '#3b82f6' :
+                      collection.color === 'green' ? '#10b981' :
+                      collection.color === 'purple' ? '#a855f7' :
+                      collection.color === 'orange' ? '#f97316' :
+                      collection.color === 'red' ? '#ef4444' :
+                      collection.color === 'pink' ? '#ec4899' :
+                      collection.color === 'indigo' ? '#6366f1' : '#3b82f6';
+
+                    return (
+                      <button
+                        key={collection.name}
+                        onClick={() => loadCollection(collection.name)}
+                        className="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 p-8 border-t-4 hover:scale-105 group"
+                        style={{ borderTopColor: hexColor }}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div style={{ color: hexColor }}>
+                            <Icon />
+                          </div>
+                          <div className="text-left">
+                            <h3 className="text-2xl font-bold text-gray-800">{collection.label}</h3>
+                            <p className="text-gray-500 text-sm">Ver y gestionar</p>
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {selectedCollection && !showForm && (
+              <div>
+                <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+                  <div className="flex items-center justify-between mb-4 flex-wrap gap-4">
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <button
+                        onClick={() => setSelectedCollection(null)}
+                        className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors"
+                      >
+                        ← Volver
+                      </button>
+                      <h2 className="text-2xl font-bold text-gray-800 capitalize">
+                        {collections.find(c => c.name === selectedCollection)?.label}
+                      </h2>
+                      <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">
+                        {filteredData.length} registros
+                      </span>
+                    </div>
+                    <button
+                      onClick={openCreateForm}
+                      className="flex items-center gap-2 px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+                    >
+                      <Plus />
+                      Crear Nuevo
+                    </button>
+                  </div>
+
+                  <div className="relative">
+                    <div className="absolute left-3 top-3">
+                      <Search />
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Buscar..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                {loading ? (
+                  <div className="bg-white rounded-xl shadow-lg p-12 text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+                    <p className="mt-4 text-gray-600">Cargando datos...</p>
+                  </div>
+                ) : (
+                  <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+                          <tr>
+                            {filteredData[0] && Object.keys(filteredData[0])
+                              .filter(key => key !== '__v')
+                              .map(key => (
+                                <th key={key} className="px-6 py-4 text-left font-semibold">
+                                  {key === '_id' ? 'ID' : key.charAt(0).toUpperCase() + key.slice(1)}
+                                </th>
+                              ))}
+                            <th className="px-6 py-4 text-right font-semibold">Acciones</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {filteredData.map((item, index) => (
+                            <tr key={item._id} className={`border-b hover:bg-blue-50 transition-colors ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}>
+                              {Object.entries(item)
+                                .filter(([key]) => key !== '__v')
+                                .map(([key, value]) => (
+                                  <td key={key} className="px-6 py-4">
+                                    {typeof value === 'object' && value !== null ? (
+                                      <span className="text-blue-600">
+                                        {value.nombre || JSON.stringify(value).slice(0, 30)}
+                                      </span>
+                                    ) : (
+                                      <span className="text-gray-800">
+                                        {String(value).length > 50 ? String(value).slice(0, 50) + '...' : String(value)}
+                                      </span>
+                                    )}
+                                  </td>
+                                ))}
+                              <td className="px-6 py-4 text-right">
+                                <div className="flex gap-2 justify-end">
+                                  <button
+                                    onClick={() => openEditForm(item)}
+                                    className="p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
+                                    title="Editar"
+                                  >
+                                    <Edit />
+                                  </button>
+                                  <button
+                                    onClick={() => handleDelete(item._id)}
+                                    className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
+                                    title="Eliminar"
+                                  >
+                                    <Trash />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    {filteredData.length === 0 && (
+                      <div className="p-12 text-center text-gray-500">
+                        No se encontraron registros
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {showForm && (
+              <div className="bg-white rounded-xl shadow-2xl p-8">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-gray-800">
+                    {editingItem ? 'Editar Registro' : 'Crear Nuevo Registro'}
+                  </h2>
+                  <button
+                    onClick={() => setShowForm(false)}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    <X />
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {data[0] && Object.keys(data[0])
+                    .filter(key => key !== '_id' && key !== '__v')
+                    .map(key => (
+                      <div key={key}>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2 capitalize">
+                          {key.replace('_', ' ')}
+                        </label>
+                        {key.includes('idcargo') && relatedData.cargos ? (
+                          <select
+                            value={formData[key] || ''}
+                            onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
+                            className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
+                          >
+                            <option value="">Seleccionar cargo</option>
+                            {relatedData.cargos.map(c => (
+                              <option key={c._id} value={c._id}>{c.nombre}</option>
+                            ))}
+                          </select>
+                        ) : key.includes('idmarca') && relatedData.marcas ? (
+                          <select
+                            value={formData[key] || ''}
+                            onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
+                            className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
+                          >
+                            <option value="">Seleccionar marca</option>
+                            {relatedData.marcas.map(m => (
+                              <option key={m._id} value={m._id}>{m.nombre}</option>
+                            ))}
+                          </select>
+                        ) : key.includes('idcategoria') && relatedData.categorias ? (
+                          <select
+                            value={formData[key] || ''}
+                            onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
+                            className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
+                          >
+                            <option value="">Seleccionar categoría</option>
+                            {relatedData.categorias.map(c => (
+                              <option key={c._id} value={c._id}>{c.nombre}</option>
+                            ))}
+                          </select>
+                        ) : key === 'sexo' ? (
+                          <select
+                            value={formData[key] || ''}
+                            onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
+                            className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
+                          >
+                            <option value="">Seleccionar sexo</option>
+                            <option value="M">Masculino</option>
+                            <option value="F">Femenino</option>
+                          </select>
+                        ) : key.includes('fecha') ? (
+                          <input
+                            type="date"
+                            value={formData[key]?.split('T')[0] || ''}
+                            onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
+                            className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
+                          />
+                        ) : typeof data[0][key] === 'number' ? (
+                          <input
+                            type="number"
+                            value={formData[key] || ''}
+                            onChange={(e) => setFormData({ ...formData, [key]: parseFloat(e.target.value) })}
+                            className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
+                          />
+                        ) : (
+                          <input
+                            type="text"
+                            value={formData[key] || ''}
+                            onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
+                            className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
+                          />
+                        )}
+                      </div>
+                    ))}
+                </div>
+
+                <div className="flex gap-4 mt-8">
+                  <button
+                    onClick={editingItem ? handleUpdate : handleCreate}
+                    className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+                  >
+                    <Save />
+                    {editingItem ? 'Actualizar' : 'Crear'}
+                  </button>
+                  <button
+                    onClick={() => setShowForm(false)}
+                    className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-semibold transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    };
+
+    ReactDOM.createRoot(document.getElementById('root')).render(
+      React.createElement(AdminPanel)
+    );
+  </script>
+</body>
+</html
